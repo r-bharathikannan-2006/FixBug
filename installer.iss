@@ -1,7 +1,7 @@
 [Setup]
 AppName=FixBug
 AppVersion=1.0
-AppPublisher=YourName
+AppPublisher=Bharathikannan R
 DefaultDirName={autopf}\FixBug
 DefaultGroupName=FixBug
 OutputBaseFilename=FixBug_Installer
