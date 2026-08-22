@@ -1,14 +1,11 @@
-; Read the environment variable from GitHub actions
-#define BuildArch GetEnv("BUILD_ARCH")
-
-; Setup file suffix and architecture parameters based on the matrix
-#if BuildArch == "x64"
+[Setup]
+; Check which compiler flag was passed by the GitHub Action's /D argument
+#ifdef Is_x64
   #define ArchSuffix "_x64"
 #else
   #define ArchSuffix "_x86"
 #endif
 
-[Setup]
 AppName='FixBug-core'
 AppVersion=1.0.0
 AppPublisher="Bharathikannan R"
@@ -23,12 +20,10 @@ ChangesEnvironment=yes
 SetupIconFile=assets\fixbug.ico
 UninstallDisplayIcon={app}\fbcore.exe
 
-; Ensure 64-bit installer installs to native Program Files and only runs on 64-bit machines
-#if BuildArch == "x64"
+; Ensure 64-bit installer installs to native Program Files and only runs on 64-bit machines.
+#ifdef Is_x64
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
-#else
-ArchitecturesAllowed=x86
 #endif
 
 [Files]
