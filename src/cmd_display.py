@@ -91,7 +91,7 @@ class Display:
         Returns:
             None
         """
-        say("FIXBUG", font="block", colors=["#E74856"])
+        say("FIXBUG - CORE", font="block", colors=["#E74856"])
 
     def display_progress(self, message: str) -> None:
         """

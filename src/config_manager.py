@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 # Set configuration directory and file paths
-CONFIG_DIR = Path.home() / "FixBug"
+CONFIG_DIR = Path.home() / "FixBug-core"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
 DEFAULT_CONFIG = {
