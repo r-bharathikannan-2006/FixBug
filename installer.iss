@@ -1,60 +1,56 @@
-name: Build and Release FixBug
+; Read the environment variable from GitHub actions
+#define BuildArch GetEnv("BUILD_ARCH")
 
-on:
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'Release Tag Version (e.g. v1.0.0)'
-        required: true
-        default: 'v1.0.0'
-  push:
-    tags:
-      - 'v*' # Trigger the workflow on version tags
+; Setup file suffix and architecture parameters based on the matrix
+#if BuildArch == "x64"
+  #define ArchSuffix "_x64"
+#else
+  #define ArchSuffix "_x86"
+#endif
 
-permissions:
-  contents: write
+[Setup]
+AppName='FixBug-core'
+AppVersion=1.0.0
+AppPublisher="Bharathikannan R"
+DefaultDirName={autopf}\fixbug-core
+DefaultGroupName=fixbug-core
+OutputDir=Output
+OutputBaseFilename=FixBug_core_Installer{#ArchSuffix}
+Compression=lzma
+SolidCompression=yes
+; Required to immediately refresh the terminal environment variables after installation
+ChangesEnvironment=yes
+SetupIconFile=assets\fixbug.ico
+UninstallDisplayIcon={app}\fbcore.exe
 
-jobs:
-  build-windows:
-    runs-on: windows-latest
-    strategy:
-      max-parallel: 1 # Prevents GitHub release creation race conditions
-      matrix:
-        architecture: ['x64', 'x86']
-    
-    env:
-      BUILD_ARCH: ${{ matrix.architecture }} # Pass the arch down to Inno Setup
+; Ensure 64-bit installer installs to native Program Files and only runs on 64-bit machines
+#if BuildArch == "x64"
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
+#else
+ArchitecturesAllowed=x86
+#endif
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+[Files]
+Source: "dist\fbcore\fbcore.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\fbcore\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          architecture: ${{ matrix.architecture }} # Forces 32-bit Python for x86
+[Icons]
+Name: "{group}\fixbug-core"; Filename: "{app}\fbcore.exe"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller
-          pip install -r requirements.txt
+[Registry]
+Root: HKLM; Subkey: "System\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: NeedsAddPath(ExpandConstant('{app}'))
 
-      - name: Build executable with PyInstaller
-        run: |
-          pyinstaller --name fbcore --icon=assets/fixbug.ico --collect-data cfonts --hidden-import tree_sitter_python --hidden-import tree_sitter_javascript --hidden-import tree_sitter_typescript --hidden-import tree_sitter_java --hidden-import tree_sitter_kotlin --hidden-import tree_sitter_c_sharp --hidden-import tree_sitter_c --hidden-import tree_sitter_cpp --hidden-import tree_sitter_go --hidden-import tree_sitter_rust --hidden-import tree_sitter_php --hidden-import tree_sitter_swift --hidden-import tree_sitter_ruby --hidden-import tree_sitter_bash --hidden-import tree_sitter_powershell --hidden-import tree_sitter_sql --hidden-import tree_sitter_dart src/main.py
-
-      - name: Compile Inno Setup Installer
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
-        with:
-          path: app_installer.iss
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ inputs.tag_name || github.ref_name }}
-          files: Output/FixBug_core_Installer_${{ matrix.architecture }}.exe
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+[Code]
+function NeedsAddPath(Param: string): boolean;
+var
+  OrigPath: string;
+begin
+  if not RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', OrigPath)
+  then begin
+    Result := True;
+    exit;
+  end;
+  { Prevent duplicating the PATH entry if the user reinstalls or updates }
+  Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
+end;
