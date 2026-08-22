@@ -35,7 +35,7 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --name fbcore --icon=fixbug.ico --collect-data cfonts --hidden-import tree_sitter_python --hidden-import tree_sitter_javascript --hidden-import tree_sitter_typescript --hidden-import tree_sitter_java --hidden-import tree_sitter_kotlin --hidden-import tree_sitter_c_sharp --hidden-import tree_sitter_c --hidden-import tree_sitter_cpp --hidden-import tree_sitter_go --hidden-import tree_sitter_rust --hidden-import tree_sitter_php --hidden-import tree_sitter_swift --hidden-import tree_sitter_ruby --hidden-import tree_sitter_bash --hidden-import tree_sitter_powershell --hidden-import tree_sitter_sql --hidden-import tree_sitter_dart src/main.py
+          pyinstaller --name fbcore --icon=assets/fixbug.ico --collect-data cfonts --hidden-import tree_sitter_python --hidden-import tree_sitter_javascript --hidden-import tree_sitter_typescript --hidden-import tree_sitter_java --hidden-import tree_sitter_kotlin --hidden-import tree_sitter_c_sharp --hidden-import tree_sitter_c --hidden-import tree_sitter_cpp --hidden-import tree_sitter_go --hidden-import tree_sitter_rust --hidden-import tree_sitter_php --hidden-import tree_sitter_swift --hidden-import tree_sitter_ruby --hidden-import tree_sitter_bash --hidden-import tree_sitter_powershell --hidden-import tree_sitter_sql --hidden-import tree_sitter_dart src/main.py
 
       - name: Compile Inno Setup Installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
