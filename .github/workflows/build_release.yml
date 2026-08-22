@@ -9,7 +9,7 @@ on:
         default: 'v1.0.0'
   push:
     tags:
-      - 'v*' # Trigger the workflow on version tags (e.g., v1.0, v2.0.0)
+      - 'v*' # Trigger the workflow on version tags
 
 permissions:
   contents: write
@@ -18,6 +18,12 @@ jobs:
   build-windows:
     runs-on: windows-latest
     
+    # THIS IS THE CRITICAL MISSING BLOCK
+    strategy:
+      max-parallel: 1 # Prevents release upload conflicts
+      matrix:
+        architecture: ['x64', 'x86']
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,7 +31,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Adjust to your development environment
+          python-version: '3.11'
+          architecture: ${{ matrix.architecture }}
 
       - name: Install dependencies
         run: |
@@ -41,6 +48,7 @@ jobs:
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
           path: installer.iss
+          options: /DIs_${{ matrix.architecture }}
 
       - name: Upload Installer as Artifact
         uses: actions/upload-artifact@v4
